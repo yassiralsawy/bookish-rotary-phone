@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>To-Do List with Local Storage</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; padding: 40px;}
+        #app { max-width: 400px; margin: 0 auto; background: #fff; padding: 2em; border-radius: 10px; box-shadow: 0 0 10px #ccc;}
+        h2 { text-align: center;}
+        #todo-form { display: flex; margin-bottom: 1em;}
+        #todo-input { flex: 1; padding: .5em;}
+        #add-btn { padding: .5em 1em; margin-left: 0.5em;}
+        ul { list-style: none; padding: 0;}
+        li { padding: .5em 0; display: flex; align-items: center; border-bottom: 1px solid #eee;}
+        li:last-child { border-bottom: none; }
+        .done { text-decoration: line-through; color: #aaa; }
+        .delete-btn { margin-left: auto; background: none; color: #d33; border: none; cursor: pointer;}
+    </style>
+</head>
+<body>
+<div id="app">
+    <h2>To-Do List</h2>
+    <form id="todo-form">
+        <input id="todo-input" type="text" placeholder="Add a new task..." autocomplete="off" required />
+        <button id="add-btn" type="submit">Add</button>
+    </form>
+    <ul id="todo-list"></ul>
+</div>
+<script>
+    const LIST_KEY = 'todoList';
+    const input = document.getElementById('todo-input');
+    const form = document.getElementById('todo-form');
+    const list = document.getElementById('todo-list');
+
+    function getTodos() {
+        return JSON.parse(localStorage.getItem(LIST_KEY) || '[]');
+    }
+
+    function setTodos(todos) {
+        localStorage.setItem(LIST_KEY, JSON.stringify(todos));
+    }
+
+    function render() {
+        const todos = getTodos();
+        list.innerHTML = '';
+        todos.forEach((todo, i) => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span class="${todo.done ? 'done':''}" onclick="toggleTodo(${i})">${todo.text}</span>
+                <button class="delete-btn" onclick="deleteTodo(${i})">✗</button>`;
+            list.appendChild(li);
+        });
+    }
+
+    window.toggleTodo = function(index) {
+        const todos = getTodos();
+        todos[index].done = !todos[index].done;
+        setTodos(todos);
+        render();
+    };
+
+    window.deleteTodo = function(index) {
+        const todos = getTodos();
+        todos.splice(index,1);
+        setTodos(todos);
+        render();
+    };
+
+    form.addEventListener('submit', function(e){
+        e.preventDefault();
+        const text = input.value.trim();
+        if(text){
+            const todos = getTodos();
+            todos.push({text, done: false});
+            setTodos(todos);
+            render();
+            input.value = '';
+        }
+    });
+
+    render();
+</script>
+</body>
+</html>
